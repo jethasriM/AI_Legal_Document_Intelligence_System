@@ -1,0 +1,22 @@
+# ── LLM backend ──────────────────────────────────────────────────
+google-generativeai        # Gemini API — draft generation
+
+# ── OCR pipeline ─────────────────────────────────────────────────
+pytesseract                # Python wrapper for Tesseract OCR engine
+pdf2image                  # Converts PDF pages to PIL images (needs poppler)
+Pillow                     # Image pre-processing (contrast, binarize, sharpen)
+
+# ── Semantic retrieval ───────────────────────────────────────────
+sentence-transformers      # Dense embeddings — all-MiniLM-L6-v2 model
+numpy                      # Cosine similarity via dot product
+
+# ── System dependencies (install separately) ─────────────────────
+# Tesseract OCR engine:
+#   Mac:    brew install tesseract
+#   Linux:  sudo apt-get install tesseract-ocr
+#   Windows: https://github.com/UB-Mannheim/tesseract/wiki
+#
+# Poppler (required by pdf2image):
+#   Mac:    brew install poppler
+#   Linux:  sudo apt-get install poppler-utils
+#   Windows: https://github.com/oschwartz10612/poppler-windows
