@@ -443,6 +443,25 @@ st.markdown(
     div[data-testid="stFileUploader"] button:active {
         color: #17211f !important;
     }
+    
+    /* ---------- Extraction warnings ---------- */
+
+    div[data-testid="stAlert"] {
+    background: #fff8c7 !important;
+    border: 1px solid #e4cf70 !important;
+    border-radius: 12px !important;
+    color: #514514 !important;
+    }
+
+    div[data-testid="stAlert"] * {
+    color: #514514 !important;
+    opacity: 1 !important;
+    }
+
+    div[data-testid="stAlert"] p {
+    color: #514514 !important;
+    opacity: 1 !important;
+    }
 
     /* ---------- Streamlit visibility fixes ---------- */
 
@@ -485,6 +504,24 @@ st.markdown(
 
     div[data-testid="stMetric"] [data-testid="stMetricDelta"] {
         color: #68736f !important;
+    }
+    
+    /* ---------- Alerts / Extraction Warnings ---------- */
+
+    div[data-testid="stAlert"] {
+    background: #fff8c7 !important;
+    border: 1px solid #e4cf70 !important;
+    border-radius: 12px !important;
+    color: #514514 !important;
+    }
+
+    div[data-testid="stAlert"] * {
+    color: #514514 !important;
+    opacity: 1 !important;
+    }
+
+    div[data-testid="stAlert"] p {
+    color: #514514 !important;
     }
 
     /* ---------- Buttons ---------- */
@@ -697,6 +734,24 @@ def find_draft_for_doc(doc_id):
         return None
 
     return max(candidates, key=lambda p: p.stat().st_mtime)
+
+def find_processed_document(filename):
+    """
+    Find the extraction artifact corresponding to a specific source document.
+    Matches against the source_path stored in the extraction JSON.
+    """
+    for path in OUTPUTS.glob("*_extracted.json"):
+        item = safe_json_load(path, {})
+
+        if not item:
+            continue
+
+        source_path = str(item.get("source_path", ""))
+
+        if Path(source_path).name.lower() == filename.lower():
+            return item
+
+    return None
 
 
 def run_pipeline(uploaded_file):
@@ -1000,14 +1055,22 @@ if page == "Analyze":
             st.session_state.pipeline_log = log
 
             if ok:
-                st.success("Analysis completed successfully.")
-                st.rerun()
+              # Remember exactly which document was analyzed.
+              st.session_state.analyzed_filename = uploaded.name
+
+              st.success("Analysis completed successfully.")
+              st.rerun()
+
             else:
                 st.error("The pipeline returned an error.")
                 with st.expander("Pipeline log"):
                     st.code(log)
 
-    doc = latest_processed_document()
+    doc = None
+    analyzed_filename = st.session_state.get("analyzed_filename")
+    
+    if analyzed_filename:
+        doc = find_processed_document(analyzed_filename)
 
     if doc:
         st.markdown('<div class="section-kicker">02 · Intelligence</div>', unsafe_allow_html=True)
@@ -1205,25 +1268,33 @@ elif page == "Documents":
         '<div class="section-copy">Browse the extraction artifacts produced by the LexTrace pipeline.</div>',
         unsafe_allow_html=True,
     )
+    
+    selected_filename = selected_file.name if selected_file else ""
 
-    extracted_files = sorted(
-        OUTPUTS.glob("*_extracted.json"),
-        key=lambda p: p.stat().st_mtime,
-        reverse=True,
-    )
+    extracted_files = []
 
-    if not extracted_files:
-        st.info("No processed documents yet. Analyze a document first.")
-    else:
-        for path in extracted_files:
-            item = safe_json_load(path, {})
-            if not item:
-                continue
+    for path in OUTPUTS.glob("*_extracted.json"):
+        item = safe_json_load(path, {})
+        if not item:
+            continue
 
-            quality = item.get("confidence_flags", {}).get("quality_score", 0)
-            doc_type = human_doc_type(item.get("doc_type", "unknown"))
-            field_count = len(item.get("structured_fields", {}))
-            warning_count = len(item.get("warnings", []))
+        source_path = str(item.get("source_path", ""))
+
+        if Path(source_path).name.lower() == selected_filename.lower():
+            extracted_files.append((path, item))
+
+
+        if not extracted_files:
+            st.info(
+        "No processed extraction found for the selected document. "
+        "Click Analyze document first."
+             )
+        else:
+            for path, item in extracted_files:
+                quality = item.get("confidence_flags", {}).get("quality_score", 0)
+                doc_type = human_doc_type(item.get("doc_type", "unknown"))
+                field_count = len(item.get("structured_fields", {}))
+                warning_count = len(item.get("warnings", []))
 
             with st.container(border=True):
                 a, b, c, d = st.columns([2.2, 1.1, 1.1, 1.1])
