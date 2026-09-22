@@ -15,7 +15,7 @@ Gemini · Streamlit · Human-in-the-loop**
 
 ## 🚀 Live Application
 
-**[Open the Live Application](YOUR-LIVE-APPLICATION-URL)**
+**[Open the Live Application](https://lextraceai.streamlit.app/)**
 
 The deployed Streamlit application provides an interactive workflow for:
 
@@ -44,9 +44,6 @@ The deployed Streamlit application provides an interactive workflow for:
 
 ![LexTrace AI Grounded Draft](assets/lextrace-draft.png)
 
-> Store the screenshots in an `assets/` folder inside `LexTrace-AI/`
-> using the filenames above. If you currently have only one screenshot,
-> keep the dashboard image and add the other screenshots when available.
 
 ------------------------------------------------------------------------
 
