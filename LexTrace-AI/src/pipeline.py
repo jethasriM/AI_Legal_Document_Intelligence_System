@@ -49,14 +49,14 @@ def run_pipeline(
 
     if verbose:
         for doc in docs:
-            print(f"  ✓ {doc.doc_id} | type={doc.doc_type} | quality={doc.confidence_flags['quality_score']} | warnings={len(doc.warnings)}")
+            print(f"  OK {doc.doc_id} | type={doc.doc_type} | quality={doc.confidence_flags['quality_score']} | warnings={len(doc.warnings)}")
 
     # Save extracted output
     for doc in docs:
         out_file = output_path / f"{doc.doc_id}_extracted.json"
         out_file.write_text(json.dumps(doc.to_dict(), indent=2))
         if verbose:
-            print(f"  → Saved extraction: {out_file}")
+            print(f"  -> Saved extraction: {out_file}")
 
     # ── 2. RETRIEVAL ──────────────────────────────────────────────────────
     if verbose:
@@ -67,7 +67,7 @@ def run_pipeline(
 
     if verbose:
         stats = store.stats()
-        print(f"  ✓ Indexed {stats['total_passages']} passages across {stats['total_documents']} doc(s)")
+        print(f"  OK Indexed {stats['total_passages']} passages across {stats['total_documents']} doc(s)")
 
     # ── 3. GENERATION ─────────────────────────────────────────────────────
     if verbose:
@@ -95,8 +95,8 @@ def run_pipeline(
         draft_md.write_text(draft.to_markdown())
 
         if verbose:
-            print(f"  ✓ Draft {draft.draft_id} | grounding={draft.overall_grounding_score:.0%} | sections={len(draft.sections)}")
-            print(f"  → Saved: {draft_md}")
+            print(f"  OK Draft {draft.draft_id} | grounding={draft.overall_grounding_score:.0%} | sections={len(draft.sections)}")
+            print(f"  -> Saved: {draft_md}")
 
     # ── 4. IMPROVEMENT ────────────────────────────────────────────────────
     if simulate_edit:
@@ -110,12 +110,12 @@ def run_pipeline(
             edit_records.append(edit_record)
 
             if verbose:
-                print(f"  ✓ Edit {edit_record.edit_id}: {edit_record.diff_summary[:100]}")
+                print(f"  OK Edit {edit_record.edit_id}: {edit_record.diff_summary[:100]}")
                 if edit_record.extracted_rules:
                     for rule in edit_record.extracted_rules:
-                        print(f"    → Rule learned: {rule}")
+                        print(f"    -> Rule learned: {rule}")
                 else:
-                    print(f"    → No new rules extracted (edit was minor)")
+                    print(f"    -> No new rules extracted (edit was minor)")
 
             # Save edit record
             edit_file = output_path / f"{edit_record.edit_id}_edit.json"

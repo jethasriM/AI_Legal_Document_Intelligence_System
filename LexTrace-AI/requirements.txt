@@ -1,0 +1,16 @@
+streamlit
+pandas
+numpy
+matplotlib
+
+google-genai
+
+sentence-transformers
+scikit-learn
+
+rank-bm25
+
+pypdf
+pillow
+
+python-dotenv

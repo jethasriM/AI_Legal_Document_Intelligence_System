@@ -1,9 +1,0 @@
-cat > .gitignore << 'EOF'
-__pycache__/
-*.pyc
-*.pyo
-.env
-improvement_store.json
-outputs/
-*.zip
-EOF
