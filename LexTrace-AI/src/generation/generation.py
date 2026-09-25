@@ -13,10 +13,16 @@ Output format: case fact summary (the chosen draft type).
 
 import json
 import os
+from pathlib import Path
 import re
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from typing import Optional
+
+from dotenv import load_dotenv
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(PROJECT_ROOT / ".env")
 
 
 # ---------------------------------------------------------------------------
@@ -151,7 +157,21 @@ Now produce a grounded case fact summary with these exact sections:
 
     sections = DRAFT_SECTION_QUERIES.get(doc_type, DRAFT_SECTION_QUERIES["unknown"])
     for section_name in sections:
-        prompt += f"\n## {section_name}\n[Write grounded content here with citations like [passage_id]]\n"
+        prompt += (
+        f"\n## {section_name}\n"
+        f"Write the grounded content for this section here. "
+        f"Every factual claim must include the relevant passage citation "
+        f"in the format [passage_id].\n"
+    )
+        
+        prompt += """
+               FORMAT REQUIREMENTS:
+               - Use the exact section headings provided above.
+               - Each heading must start with ##.
+               - Do not rename, merge, or omit sections.
+               - Write actual content under every section when the evidence supports it.
+               - If evidence is genuinely unavailable, write "NOT FOUND IN DOCUMENTS".
+                """
 
     prompt += "\n\nIMPORTANT: End your response with a line: GROUNDING_ASSESSMENT: X/10 (where X reflects how well the output is supported by evidence)"
 
@@ -163,53 +183,88 @@ Now produce a grounded case fact summary with these exact sections:
 # ---------------------------------------------------------------------------
 
 def call_llm(prompt: str, system: str = "") -> str:
-    """
-    Call Google Gemini API (gemini-2.0-flash).
+    """Call Gemini using the modern google-genai SDK."""
 
-    Requires:
-      pip install google-generativeai
-      export GEMINI_API_KEY=AIza...
+    api_key = os.environ.get("GEMINI_API_KEY", "").strip()
 
-    Falls back gracefully if the key is missing or the package is not installed.
-    """
-    api_key = os.environ.get("GEMINI_API_KEY", "")
     if not api_key:
         return (
-            "[GEMINI_API_KEY not set]\n\n"
-            "Set it with: export GEMINI_API_KEY=AIza...\n"
-            "Then re-run the pipeline."
+            "[GENERATION_ERROR: GEMINI_API_KEY is not set]\n\n"
+            "Configure GEMINI_API_KEY and rerun the pipeline."
         )
 
     try:
-        import google.generativeai as genai
+        from google import genai
+        from google.genai import types
 
-        genai.configure(api_key=api_key)
+        client = genai.Client(api_key=api_key)
 
-        model = genai.GenerativeModel(
-            model_name="gemini-2.0-flash",
-            system_instruction=system if system else (
-                "You are a legal document analyst. Follow all instructions precisely."
-            ),
+        system_instruction = (
+            system
+            if system
+            else (
+                "You are a legal document analyst. "
+                "Follow the provided grounding rules exactly. "
+                "Do not invent facts."
+            )
         )
 
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(
-                max_output_tokens=2000,
-                temperature=0.2,   # low temperature — we want factual, grounded output
-            ),
-        )
+        models = [
+            "gemini-2.5-flash",
+            "gemini-3.5-flash-lite",
+            "gemini-3.1-flash-lite",
+        ]
 
-        return response.text
+        last_error = None
+
+        for model_name in models:
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        system_instruction=system_instruction,
+                        temperature=0.2,
+                        max_output_tokens=6000,
+                    ),
+                )
+
+                text = getattr(response, "text", None)
+
+                if text:
+                    return text.strip()
+
+                last_error = (
+                    f"{model_name} returned an empty response"
+                )
+
+            except Exception as exc:
+                last_error = (
+                    f"{model_name}: {str(exc)[:500]}"
+                )
+
+                print(
+                    f"Gemini {model_name} failed: "
+                    f"{str(exc)[:200]}"
+                )
+
+                continue
+
+        return (
+            "[GENERATION_ERROR: All Gemini models failed]\n\n"
+            f"Last error: {last_error}"
+        )
 
     except ImportError:
         return (
-            "[google-generativeai not installed]\n\n"
-            "Run: pip install google-generativeai\n"
-            "Then re-run the pipeline."
+            "[GENERATION_ERROR: google-genai is not installed]\n\n"
+            "Run: python -m pip install -U google-genai"
         )
-    except Exception as e:
-        return f"[GEMINI_ERROR: {str(e)[:150]}]\n\nCheck your API key and network connection."
+
+    except Exception as exc:
+        return (
+            f"[GENERATION_ERROR: {str(exc)[:500]}]"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -217,15 +272,112 @@ def call_llm(prompt: str, system: str = "") -> str:
 # ---------------------------------------------------------------------------
 
 def _parse_llm_sections(raw: str, section_names: list[str]) -> dict[str, str]:
-    """Parse the LLM's section-by-section response into a dict."""
+    """
+    Parse the LLM response into named sections.
+
+    Handles common Markdown variations such as:
+        ## Section
+        ### Section
+        Section
+        **Section**
+
+    Also preserves the section content instead of silently
+    returning an empty section when formatting differs slightly.
+    """
     result = {}
-    for name in section_names:
-        pattern = rf"##\s*{re.escape(name)}\s*\n(.*?)(?=\n##\s|\nGROUNDING_ASSESSMENT:|$)"
-        match = re.search(pattern, raw, re.DOTALL)
-        if match:
-            result[name] = match.group(1).strip()
-        else:
+
+    if not raw or not raw.strip():
+        return {
+            name: "[Section not generated]"
+            for name in section_names
+        }
+
+    text = raw.strip()
+
+    for index, name in enumerate(section_names):
+
+        # Match the requested section heading with optional Markdown
+        # heading markers or bold formatting.
+        heading_pattern = rf"""
+            ^\s*
+            (?:
+                \#{{1,6}}\s*
+                |
+                \*\*\s*
+            )?
+            {re.escape(name)}
+            \s*
+            (?:\*\*)?
+            \s*$
+        """
+
+        match = re.search(
+            heading_pattern,
+            text,
+            flags=re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+        )
+
+        if not match:
             result[name] = "[Section not generated]"
+            continue
+
+        content_start = match.end()
+
+        # Find the next known section heading.
+        next_positions = []
+
+        for next_name in section_names[index + 1:]:
+
+            next_pattern = rf"""
+                ^\s*
+                (?:
+                    \#{{1,6}}\s*
+                    |
+                    \*\*\s*
+                )?
+                {re.escape(next_name)}
+                \s*
+                (?:\*\*)?
+                \s*$
+            """
+
+            next_match = re.search(
+                next_pattern,
+                text[content_start:],
+                flags=re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+            )
+
+            if next_match:
+                next_positions.append(
+                    content_start + next_match.start()
+                )
+
+        # Also stop before the grounding assessment.
+        grounding_match = re.search(
+            r"^\s*GROUNDING_ASSESSMENT\s*:",
+            text[content_start:],
+            flags=re.IGNORECASE | re.MULTILINE,
+        )
+
+        if grounding_match:
+            next_positions.append(
+                content_start + grounding_match.start()
+            )
+
+        content_end = (
+            min(next_positions)
+            if next_positions
+            else len(text)
+        )
+
+        content = text[content_start:content_end].strip()
+
+        result[name] = (
+            content
+            if content
+            else "[Section not generated]"
+        )
+
     return result
 
 

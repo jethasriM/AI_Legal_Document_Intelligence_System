@@ -14,3 +14,7 @@ pypdf
 pillow
 
 python-dotenv
+
+fastapi
+uvicorn[standard]
+python-multipart
