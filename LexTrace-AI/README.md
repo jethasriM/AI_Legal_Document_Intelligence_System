@@ -8,11 +8,11 @@ The system combines OCR, NLP, hybrid retrieval, and Gemini-powered generation wh
 
 ## 🌐 Live Demo
 
-**Frontend:** [Add your Vercel URL]
+**Frontend:** [https://lextraceai.vercel.app/]
 
-**Backend API:** [Add your Render URL]
+**Backend API:** [https://lextrace-ai-api.onrender.com]
 
-**API Documentation:** [Add your Render URL]/docs
+**API Documentation:** [https://lextrace-ai-api.onrender.com/docs]
 
 ---
 
