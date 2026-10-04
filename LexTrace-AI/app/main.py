@@ -17,6 +17,12 @@ app = FastAPI(
     description="Evidence-grounded legal document intelligence API",
     version="1.0.0",
 )
+
+@app.api_route("/health", methods=["GET", "HEAD"])
+def health():
+    return {"status": "ok"}
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
