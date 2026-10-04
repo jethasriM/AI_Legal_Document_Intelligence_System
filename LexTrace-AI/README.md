@@ -1,745 +1,499 @@
-# LexTrace AI
+# LexTrace AI — Evidence-Grounded Legal Document Intelligence
 
-> **Evidence-grounded legal document intelligence.**
->
-> LexTrace AI processes messy legal documents, extracts structured
-> information, retrieves supporting evidence using hybrid semantic +
-> BM25 search, and generates source-grounded draft summaries with
-> Gemini. Operator corrections can be captured and transformed into
-> reusable generation rules that influence subsequent drafts.
+**[🚀 Live Demo](https://lextraceai.vercel.app/) · [📖 API Docs](https://lextrace-ai-api.onrender.com/docs) · [💻 GitHub](https://github.com/jethasriM/AI_Legal_Document_Intelligence_System)**
 
-**AI / NLP · Document Intelligence · RAG · OCR · Hybrid Retrieval ·
-Gemini · Streamlit · Human-in-the-loop**
+LexTrace AI is an AI-powered legal document intelligence system that transforms messy, scanned, and semi-structured legal documents into structured information and evidence-grounded drafts.
 
-------------------------------------------------------------------------
+The system combines OCR, NLP, hybrid retrieval, and Gemini-powered generation while preserving links between generated content and its source evidence.
 
-## 🚀 Live Application
+**[🚀 Live Demo](https://lextraceai.vercel.app/) · [📖 API Docs](https://lextrace-ai-api.onrender.com/docs) · [💻 GitHub](https://github.com/jethasriM/AI_Legal_Document_Intelligence_System)**
 
-**[Open the Live Application](https://lextraceai.streamlit.app/)**
+> **Note:** LexTrace AI is an assistive document-intelligence system. Generated outputs are drafts and require professional legal verification. The system does not provide legal advice.
 
-The deployed Streamlit application provides an interactive workflow for:
+## 🌐 Live Demo
 
--   Uploading legal documents
--   Extracting structured information
--   Reviewing verified, uncertain, and missing fields
--   Inspecting source evidence and page references
--   Generating grounded drafts
--   Reviewing evidence trails
--   Inspecting evaluation information
+**Live Application:** [LexTrace AI](https://lextraceai.vercel.app/)
 
+**Backend API:** [FastAPI on Render](https://lextrace-ai-api.onrender.com)
 
-------------------------------------------------------------------------
+**API Documentation:** [FastAPI Docs](https://lextrace-ai-api.onrender.com/docs)
 
-## 📸 Screenshots
+---
 
-### Document Intelligence Dashboard
+## 🚀 Key Features
 
-![LexTrace AI Dashboard](assets/lextrace-dashboard.png)
+- **Legal Document Ingestion** — Processes PDF and text-based legal documents with OCR, preprocessing, metadata extraction, and page tracking.
+- **Structured Information Extraction** — Extracts parties, dates, financial amounts, case references, disputes, missing documents, and other relevant fields.
+- **Uncertainty Detection** — Flags illegible, damaged, ambiguous, or missing information instead of silently generating values.
+- **Hybrid Retrieval** — Combines BM25 lexical retrieval with Sentence Transformer semantic search.
+- **Evidence-Grounded Generation** — Uses Gemini to generate structured drafts grounded in retrieved source evidence.
+- **Source Citations** — Links retrieved evidence to source documents, pages, and chunks.
+- **Human-in-the-Loop Review** — Captures operator corrections and converts them into reusable generation rules.
+- **Evaluation** — Provides development-time evaluation of retrieval, extraction, grounding, and generation.
+- **Full-Stack Application** — React frontend with a FastAPI backend.
 
-### Extraction & Evidence Review
+---
 
-![LexTrace AI Extraction and Evidence](assets/lextrace-extraction.png)
+## 🏗️ System Architecture
 
-### Grounded Draft
-
-![LexTrace AI Grounded Draft](assets/lextrace-draft.png)
-
-
-------------------------------------------------------------------------
-
-## Overview
-
-Legal documents are often difficult to process automatically because
-they can contain inconsistent formatting, OCR errors, missing
-information, damaged pages, ambiguous values, and unstructured narrative
-text.
-
-**LexTrace AI** is an end-to-end document intelligence pipeline designed
-to address these challenges.
-
-The system:
-
-1.  Ingests and cleans document content
-2.  Identifies document types and extracts structured legal fields
-3.  Tracks field-level evidence and uncertainty
-4.  Splits documents into page-aware passages
-5.  Retrieves relevant evidence using **hybrid semantic + BM25
-    retrieval**
-6.  Generates grounded drafts using **Google Gemini**
-7.  Links generated content back to source documents and pages
-8.  Captures operator edits as reusable generation rules
-9.  Provides evaluation and review artifacts
-
-The goal is not to replace legal professionals, but to provide a
-**traceable AI-assisted workflow where generated information can be
-reviewed against its source evidence**.
-
-------------------------------------------------------------------------
-
-## Architecture
-
-``` text
-                         ┌─────────────────────┐
-                         │   Document Input    │
-                         │ PDF / Image / Text   │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │     INGESTION       │
-                         │ Cleaning / OCR /    │
-                         │ Metadata / Parsing  │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │  LEGAL EXTRACTION   │
-                         │ Entities / Dates /  │
-                         │ Parties / Amounts   │
-                         └──────────┬──────────┘
-                                    │
-                       ┌────────────┴────────────┐
-                       ▼                         ▼
-              ┌─────────────────┐      ┌─────────────────┐
-              │ Structured Data │      │ Source Evidence │
-              │ + Confidence    │      │ Page / Excerpt  │
-              └────────┬────────┘      └────────┬────────┘
-                       │                         │
-                       └────────────┬────────────┘
-                                    ▼
-                         ┌─────────────────────┐
-                         │ HYBRID RETRIEVAL    │
-                         │ Semantic + BM25     │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │ GROUNDED GENERATION │
-                         │       Gemini        │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │ HUMAN REVIEW        │
-                         │ Evidence / Draft    │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │ FEEDBACK / IMPROVE  │
-                         │ Reusable rules      │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │    EVALUATION       │
-                         └─────────────────────┘
+```text
+Document Input
+      ↓
+Document Ingestion
+(PDF / OCR / Preprocessing)
+      ↓
+Legal Information Extraction
+(Entities / Dates / Parties / Fields)
+      ↓
+Hybrid Retrieval
+(BM25 + Semantic Search)
+      ↓
+Evidence-Grounded Generation
+(Gemini API)
+      ↓
+Human Review
+(Review / Corrections)
+      ↓
+Evaluation & Improvement
 ```
 
-See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the detailed system design
-and module-level decisions.
+---
 
-------------------------------------------------------------------------
+## 🛠️ Tech Stack
 
-## Key Features
+### Backend
+Python | FastAPI | REST APIs
 
-### 📄 Document Ingestion
+### AI / NLP
+Gemini API | NLP | OCR | RAG | BM25 | Sentence Transformers | Hybrid Retrieval
 
--   Document type detection
--   OCR/noise cleaning
--   Structured field extraction
--   Document metadata
--   Page-aware processing
--   Missing and uncertain information detection
+### Document Processing
+PDF Processing | Structured Information Extraction | Page-aware Chunking | Evidence Mapping
 
-### 🔎 Evidence-Grounded Retrieval
+### Frontend
+React | Vite | JavaScript
 
-LexTrace AI uses a hybrid retrieval strategy combining:
+### Deployment & Development
+Git | GitHub | Vercel | Render
 
--   **Semantic similarity** using `sentence-transformers`
--   **BM25 lexical retrieval**
--   Weighted score combination
--   Page-aware document chunks
--   Source-quality metadata
+---
 
-This allows retrieval to consider both **semantic meaning** and **exact
-legal terminology**.
+## 📂 Project Structure
 
-### 🧾 Field-Level Evidence
-
-Extracted fields are not treated as equally reliable.
-
-LexTrace AI tracks states such as:
-
-``` text
-VERIFIED
-UNCERTAIN
-MISSING
+```text
+LexTrace-AI/
+│
+├── app/
+│   ├── __init__.py
+│   └── main.py
+│
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   ├── index.html
+│   ├── package.json
+│   └── package-lock.json
+│
+├── samples/
+│
+├── src/
+│   ├── generation/
+│   │   └── generation.py
+│   ├── improvement/
+│   │   └── improvement.py
+│   ├── ingestion/
+│   │   └── ingestion.py
+│   ├── retrieval/
+│   │   └── retrieval.py
+│   ├── evaluation.py
+│   └── pipeline.py
+│
+├── tests/
+│   └── test_pipeline.py
+│
+├── ARCHITECTURE.md
+├── ASSUMPTIONS_TRADEOFFS.md
+├── README.md
+├── SAMPLE_INPUTS_OUTPUTS.md
+├── requirements.txt
+└── .gitignore
 ```
 
-For supported fields, the system can associate the extracted value with:
+---
 
-``` text
-Source document
-Page number
-Source excerpt
-Evidence status
-Reason for uncertainty
-```
+## ⚙️ Installation
 
-This is particularly useful for values affected by OCR noise, illegible
-text, or damaged documents.
+### 1. Clone the Repository
 
-### 🤖 Grounded Generation
-
-Drafts are generated using Google Gemini with retrieved source passages
-and structured extraction context.
-
-The generation pipeline is designed to:
-
--   Use retrieved evidence
--   Preserve source uncertainty
--   Avoid inventing missing values
--   Include source references
--   Distinguish extracted facts from uncertain information
-
-### 👤 Human-in-the-Loop Improvement
-
-Operator edits can be captured and analyzed to extract reusable
-generation rules.
-
-``` text
-Operator edit
-      ↓
-Difference analysis
-      ↓
-Rule extraction
-      ↓
-Persistent improvement store
-      ↓
-Future generation prompts
-```
-
-Operator corrections can therefore influence **future drafting behavior
-without requiring manual prompt changes for every iteration**.
-
-### 📊 Evaluation
-
-The project includes an evaluation framework covering areas such as:
-
--   Extraction
--   Retrieval
--   Grounding
--   Improvement behavior
-
-Evaluation outputs are stored as development artifacts rather than being
-presented as a universal production accuracy score.
-
-------------------------------------------------------------------------
-
-## Streamlit Application
-
-LexTrace AI includes a Streamlit interface designed around the
-document-review workflow.
-
-The UI provides:
-
--   Document upload
--   Document intelligence overview
--   Extracted fields
--   Confidence and uncertainty indicators
--   Source evidence
--   Grounded drafts
--   Evidence trail
--   Review history
--   Evaluation information
-
-The interface emphasizes **traceability and human verification** rather
-than presenting generated text as authoritative legal advice.
-
-------------------------------------------------------------------------
-
-## Quick Start
-
-### Prerequisites
-
--   Python 3.10+
--   Google Gemini API key
-
-Create a Gemini API key through [Google AI
-Studio](https://aistudio.google.com/).
-
-### 1. Clone the repository
-
-``` bash
+```bash
 git clone https://github.com/jethasriM/AI_Legal_Document_Intelligence_System.git
 cd AI_Legal_Document_Intelligence_System/LexTrace-AI
 ```
 
-### 2. Create a virtual environment
+### 2. Create a Virtual Environment
 
-#### Windows
-
-``` powershell
-python -m venv venv
-venv\Scripts\activate
+```bash
+python -m venv .venv
 ```
 
-#### macOS / Linux
+Activate on Windows:
 
-``` bash
-python3 -m venv venv
-source venv/bin/activate
+```powershell
+.venv\Scripts\activate
 ```
 
-### 3. Install dependencies
+### 3. Install Dependencies
 
-``` bash
+```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configure Gemini
+### 4. Configure Environment Variables
 
-#### Windows PowerShell
+Create a `.env` file inside the `LexTrace-AI` directory:
 
-``` powershell
-$env:GEMINI_API_KEY="YOUR_API_KEY"
+```env
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
-#### Windows CMD
+Do not commit your API key to GitHub.
 
-``` cmd
-set GEMINI_API_KEY=YOUR_API_KEY
+---
+
+## ▶️ Run the Backend
+
+From the `LexTrace-AI` directory:
+
+```bash
+python -m uvicorn main:app --reload --app-dir app
 ```
 
-#### macOS / Linux
+Backend:
 
-``` bash
-export GEMINI_API_KEY="YOUR_API_KEY"
+```text
+http://127.0.0.1:8000
 ```
 
-------------------------------------------------------------------------
+FastAPI documentation:
 
-## Run the Pipeline
-
-Process the sample documents:
-
-``` bash
-python src/pipeline.py --input samples/
+```text
+http://127.0.0.1:8000/docs
 ```
 
-Process a specific document:
+---
 
-``` bash
-python src/pipeline.py --input samples/case_intake_003.txt
+## 💻 Run the Frontend
+
+Open another terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
 ```
 
-Run with the operator-improvement simulation:
+Frontend:
 
-``` bash
-python src/pipeline.py --input samples/ --simulate-edit
+```text
+http://localhost:5173
 ```
 
-### Available options
+For local development, configure:
 
-``` text
---input PATH
-    File or directory to process
-
---simulate-edit
-    Simulate operator edits and extract reusable improvement rules
-
---output-dir PATH
-    Directory for generated outputs
-
---store PATH
-    Path to the improvement-rule store
-
---quiet
-    Reduce console output
+```env
+VITE_API_URL=http://127.0.0.1:8000
 ```
 
-------------------------------------------------------------------------
+For production, set `VITE_API_URL` to your deployed FastAPI backend URL.
 
-## Run the Streamlit Application
+---
 
-``` bash
-streamlit run app.py
+## 🔄 Document Processing Pipeline
+
+### 1. Ingestion
+
+Documents are loaded and normalized before their contents are extracted.
+
+The ingestion layer tracks:
+
+- Document type
+- Source path
+- Raw and cleaned text
+- Page count
+- OCR usage
+- Warnings
+- Structured fields
+- Field-level evidence
+
+### 2. Legal Information Extraction
+
+Relevant legal information is extracted into structured fields, including:
+
+```text
+Case Reference
+Parties
+Dates
+Financial Amounts
+Nature of Dispute
+Missing Documents
+Legal Notice Demands
+Property Details
 ```
 
-The application provides an interactive workflow for analyzing
-documents, reviewing extracted information, inspecting evidence, and
-viewing generated drafts.
+Unclear information is explicitly marked instead of being treated as verified.
 
-------------------------------------------------------------------------
+### 3. Hybrid Retrieval
 
-## Run Tests
+Documents are divided into page-aware passages.
 
-``` bash
-python tests/test_pipeline.py
+```text
+BM25 Retrieval
+      +
+Semantic Retrieval
+      ↓
+Hybrid Ranking
 ```
 
-------------------------------------------------------------------------
+Semantic retrieval uses Sentence Transformers when available, with BM25 serving as a lexical retrieval fallback.
 
-## Project Structure
+### 4. Grounded Generation
 
-``` text
-AI_Legal_Document_Intelligence_System/
-│
-├── LexTrace-AI/
-│   ├── app.py
-│   │
-│   ├── assets/
-│   │   ├── lextrace-dashboard.png
-│   │   ├── lextrace-extraction.png
-│   │   └── lextrace-draft.png
-│   │
-│   ├── samples/
-│   │   ├── case_intake_003.txt
-│   │   ├── legal_notice_002.txt
-│   │   └── title_deed_001.txt
-│   │
-│   ├── src/
-│   │   ├── ingestion/
-│   │   │   └── ingestion.py
-│   │   ├── retrieval/
-│   │   │   └── retrieval.py
-│   │   ├── generation/
-│   │   │   └── generation.py
-│   │   ├── improvement/
-│   │   │   └── improvement.py
-│   │   ├── pipeline.py
-│   │   └── evaluation.py
-│   │
-│   ├── tests/
-│   │   └── test_pipeline.py
-│   │
-│   ├── README.md
-│   ├── ARCHITECTURE.md
-│   ├── ASSUMPTIONS_TRADEOFFS.md
-│   ├── SAMPLE_INPUTS_OUTPUTS.md
-│   └── requirements.txt
-│
-└── .gitignore
+Retrieved evidence and structured extraction results are provided to Gemini to generate the requested draft.
+
+The generation process is designed to:
+
+- Ground factual claims in retrieved evidence.
+- Preserve uncertain values.
+- Identify missing information.
+- Avoid unsupported legal claims.
+- Maintain the requested document structure.
+
+### 5. Human Review
+
+Generated drafts can be reviewed and corrected by an operator.
+
+Operator corrections can be converted into reusable generation rules that influence subsequent drafts.
+
+### 6. Evaluation
+
+The pipeline records retrieval, grounding, extraction, and generation information for development-time evaluation.
+
+---
+
+## 📊 Demonstration Dataset
+
+The project includes sample legal documents representing:
+
+| Document Type | Example |
+|---|---|
+| Case Intake | Apartment purchase dispute |
+| Legal Notice | Rental / tenancy dispute |
+| Title Deed | Property transaction |
+
+The demonstration dataset contains **3 document types** and the retrieval pipeline can index **20 passages** across the sample documents.
+
+---
+
+## 🔎 Evidence & Uncertainty Handling
+
+A core design principle of LexTrace AI is distinguishing between verified and uncertain information.
+
+```text
+Source Evidence
+      ↓
+Field Extraction
+      ↓
+Evidence Matching
+      ↓
+┌───────────────┬────────────────┐
+│   Verified    │    Uncertain   │
+│               │                │
+│ Source found  │ Illegible /    │
+│ and linked    │ damaged /      │
+│               │ ambiguous      │
+└───────────────┴────────────────┘
 ```
 
-------------------------------------------------------------------------
+Evidence records can contain:
 
-## Technology Stack
-
-  Layer                       Technology
-  --------------------------- -----------------------
-  Language                    Python
-  UI                          Streamlit
-  LLM                         Google Gemini
-  LLM SDK                     `google-genai`
-  Semantic Retrieval          Sentence Transformers
-  Lexical Retrieval           BM25
-  ML / Numerical Processing   NumPy, scikit-learn
-  Document Processing         pypdf, Pillow
-  Testing                     Python test suite
-  Configuration               Environment variables
-
-------------------------------------------------------------------------
-
-## Retrieval Architecture
-
-LexTrace AI combines semantic and lexical retrieval:
-
-``` text
-                    Query
-                      │
-             ┌────────┴────────┐
-             ▼                 ▼
-        Semantic Search      BM25
-             │                 │
-             └────────┬────────┘
-                      ▼
-              Weighted Ranking
-                      │
-                      ▼
-             Relevant Passages
+```text
+Status
+Value
+Page
+Source Excerpt
+Reason
 ```
 
-The current implementation uses a semantic/BM25 hybrid rather than
-relying exclusively on either lexical or embedding-based retrieval.
+This allows reviewers to identify information that requires additional verification.
 
-The semantic retrieval component uses:
+---
 
-``` text
-all-MiniLM-L6-v2
+## 📌 Example Output
+
+Generated drafts can contain structured sections such as:
+
+```text
+CASE SUMMARY
+
+PARTIES
+
+NATURE OF DISPUTE
+
+KEY FACTS
+
+FINANCIAL SUMMARY
+
+MISSING DOCUMENTS
+
+NEXT ACTIONS
 ```
 
-with hybrid weighting between semantic and BM25 scores.
+Supporting evidence can be referenced using source citations such as:
 
-------------------------------------------------------------------------
-
-## Sample Documents
-
-The repository includes synthetic documents designed to exercise
-different document-processing challenges.
-
-### `case_intake_003.txt`
-
-Example characteristics:
-
--   Case metadata
--   Parties
--   Payment information
--   Missing documentation
--   Legal next steps
-
-### `legal_notice_002.txt`
-
-Example characteristics:
-
--   Rental dispute
--   Monetary dues
--   Alleged violations
--   Uncertain or illegible values
--   Multiple requested actions
-
-### `title_deed_001.txt`
-
-Example characteristics:
-
--   Property information
--   Sale consideration
--   Missing receipt
--   Boundary dispute
--   Municipal dues
--   Damaged or partial information
-
-These examples allow the pipeline to demonstrate extraction, uncertainty
-handling, retrieval, and grounded generation without exposing real
-client information.
-
-------------------------------------------------------------------------
-
-## Output Artifacts
-
-Running the pipeline generates artifacts under the configured output
-directory.
-
-### Extracted document JSON
-
-``` text
-*_extracted.json
-```
-
-Contains structured extraction information, confidence/uncertainty
-flags, metadata, and source evidence.
-
-### Generated drafts
-
-``` text
-*_draft.md
-```
-
-Human-readable generated draft output.
-
-### Draft metadata
-
-``` text
-*_draft.json
-```
-
-Structured generation information and evidence/provenance data.
-
-### Review records
-
-``` text
-*_edit.json
-```
-
-Records operator edits and extracted improvement rules when the
-improvement workflow is used.
-
-### Evaluation
-
-``` text
-evaluation_report.json
-```
-
-Development evaluation results and per-document information.
-
-Runtime artifacts are excluded from version control.
-
-------------------------------------------------------------------------
-
-## Evidence and Traceability
-
-A core design principle of LexTrace AI is:
-
-> **A generated claim should be traceable to the evidence used to
-> produce it.**
-
-Retrieval passages contain source metadata such as:
-
-``` text
-Source document
-Page number
-Chunk number
-Source quality
-Passage text
-```
-
-Example citation:
-
-``` text
+```text
 [Source: legal_notice_002.txt, page 1, chunk 3]
 ```
 
-This creates a traceability path:
+---
 
-``` text
-Generated statement
-       ↓
-Retrieved evidence
-       ↓
-Original document
-       ↓
-Specific page / passage
+## 🔐 Environment Variables
+
+### Backend
+
+```env
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
-------------------------------------------------------------------------
+### Frontend
 
-## Handling Uncertainty
-
-Legal documents can contain information that cannot be reliably
-recovered from the source.
-
-LexTrace AI therefore distinguishes between:
-
-``` text
-Verified
-   ↓
-Evidence found and matched
-
-Uncertain
-   ↓
-Possible OCR ambiguity / damaged / illegible content
-
-Missing
-   ↓
-Expected information was not found
+```env
+VITE_API_URL=https://your-backend-url
 ```
 
-For example, an illegible electricity amount should not silently become
-a fabricated number.
+`VITE_API_URL` is a public configuration value.
 
-Instead, the system can surface the uncertainty and preserve the source
-indication.
+API credentials such as `GEMINI_API_KEY` must remain on the backend and should never be exposed through frontend code.
 
-------------------------------------------------------------------------
+---
 
-## Evaluation Philosophy
+## 🚀 Deployment
 
-The evaluation framework is intended as a **development-time measurement
-tool**, not as a claim that the system achieves a universal
-legal-document accuracy percentage.
+LexTrace AI uses a split deployment architecture:
 
-The project evaluates multiple stages independently:
-
-``` text
-Extraction
-    ↓
-Retrieval
-    ↓
-Grounding
-    ↓
-Improvement
+```text
+React + Vite
+      │
+      ▼
+   Vercel
+      │
+      │ REST API
+      ▼
+FastAPI Backend
+      │
+      ▼
+   Render
 ```
 
-This makes it possible to identify where errors occur rather than
-reducing the entire system to a single accuracy number.
+### Frontend — Vercel
 
-------------------------------------------------------------------------
+Deploy the `frontend` directory to Vercel.
 
-## Design Decisions
+Set:
 
-### Architecture
+```text
+VITE_API_URL=https://your-render-backend-url
+```
 
-See [`ARCHITECTURE.md`](ARCHITECTURE.md) for:
+### Backend — Render
 
--   System architecture
--   Module responsibilities
--   Data flow
--   Retrieval design
--   Generation flow
--   Evidence handling
+Set the root directory to:
 
-### Assumptions & Tradeoffs
+```text
+LexTrace-AI
+```
 
-See [`ASSUMPTIONS_TRADEOFFS.md`](ASSUMPTIONS_TRADEOFFS.md) for:
+Build command:
 
--   Current assumptions
--   Engineering tradeoffs
--   Known limitations
--   Potential future improvements
+```bash
+pip install -r requirements.txt
+```
 
-### Sample Inputs & Outputs
+Start command:
 
-See [`SAMPLE_INPUTS_OUTPUTS.md`](SAMPLE_INPUTS_OUTPUTS.md) for annotated
-examples showing what each stage of the pipeline produces.
+```bash
+python -m uvicorn main:app --host 0.0.0.0 --port $PORT --app-dir app
+```
 
-------------------------------------------------------------------------
+Environment variable:
 
-## Limitations
+```text
+GEMINI_API_KEY=your_secret_key
+```
 
-The current implementation is a project/development system rather than a
-production legal platform.
+---
 
-Known limitations include:
+## 🧪 Testing
 
--   OCR quality depends on the quality of the source document
--   Legal-domain extraction is based on the implemented field patterns
-    and rules
--   Retrieval quality depends on chunking and query formulation
--   Generated drafts depend on the selected Gemini model
--   Evaluation is currently based on the project's available test/sample
-    data
--   Human verification is required before professional use
+Run the pipeline:
 
-------------------------------------------------------------------------
+```bash
+python -m src.pipeline
+```
 
-## Future Improvements
+Run tests:
 
-Potential next steps include:
+```bash
+pytest
+```
 
--   Production OCR integration for scanned PDFs
--   Better handwriting recognition
--   Layout-aware document parsing
--   Legal-domain embedding models
--   Retrieval reranking
--   Larger benchmark datasets
--   Automated citation verification
--   More comprehensive legal entity extraction
--   Human-review analytics
--   Larger-scale retrieval and generation evaluation
--   Containerized deployment
--   Authentication and document access controls
--   Secure document storage and access policies
+---
 
-------------------------------------------------------------------------
+## 📚 Documentation
 
-## Important Disclaimer
+Additional technical documentation:
 
-LexTrace AI is an **AI-assisted document intelligence and drafting
-system**.
+- `ARCHITECTURE.md` — System architecture and component design
+- `ASSUMPTIONS_TRADEOFFS.md` — Engineering assumptions and design trade-offs
+- `SAMPLE_INPUTS_OUTPUTS.md` — Sample inputs and generated outputs
 
-It does not provide legal advice, determine legal outcomes, or replace
-review by a qualified legal professional.
+---
 
-Generated information should be verified against the original source
-documents before professional use.
+## ⚠️ Limitations
 
-------------------------------------------------------------------------
+- OCR quality depends on source document quality.
+- Poorly scanned or damaged documents may produce uncertain extraction.
+- Retrieval quality depends on document content and available semantic models.
+- Generated drafts require human verification.
+- Development-time grounding scores should not be interpreted as production accuracy benchmarks.
+- The system does not provide legal advice or replace professional legal review.
 
-## Author
+---
+
+## 🔮 Future Improvements
+
+- Legal-domain embedding models
+- Improved handwritten-document OCR
+- Advanced entity and clause extraction
+- Automated citation verification
+- Larger evaluation datasets
+- Authentication and role-based access
+- Persistent document storage
+- Asynchronous processing for large document collections
+- Advanced human-review workflows
+- Production monitoring and observability
+
+---
+
+## 👩‍💻 Author
 
 **Jethasri Muvvala**
 
-AI/ML Engineer · Software Developer
+AI/ML Engineer | Generative AI | NLP | Computer Vision | Backend Development
 
 [GitHub](https://github.com/jethasriM)
+
+---
+
+## 📄 License
+
+This project is intended for educational, research, and portfolio purposes.
