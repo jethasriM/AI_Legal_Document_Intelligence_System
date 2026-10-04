@@ -1,22 +1,18 @@
 # LexTrace AI — Evidence-Grounded Legal Document Intelligence
 
-**[🚀 Live Demo](https://lextraceai.vercel.app/) · [📖 API Docs](https://lextrace-ai-api.onrender.com/docs) · [💻 GitHub](https://github.com/jethasriM/AI_Legal_Document_Intelligence_System)**
-
 LexTrace AI is an AI-powered legal document intelligence system that transforms messy, scanned, and semi-structured legal documents into structured information and evidence-grounded drafts.
 
 The system combines OCR, NLP, hybrid retrieval, and Gemini-powered generation while preserving links between generated content and its source evidence.
-
-**[🚀 Live Demo](https://lextraceai.vercel.app/) · [📖 API Docs](https://lextrace-ai-api.onrender.com/docs) · [💻 GitHub](https://github.com/jethasriM/AI_Legal_Document_Intelligence_System)**
 
 > **Note:** LexTrace AI is an assistive document-intelligence system. Generated outputs are drafts and require professional legal verification. The system does not provide legal advice.
 
 ## 🌐 Live Demo
 
-**Live Application:** [LexTrace AI](https://lextraceai.vercel.app/)
+**Frontend:** [Add your Vercel URL]
 
-**Backend API:** [FastAPI on Render](https://lextrace-ai-api.onrender.com)
+**Backend API:** [Add your Render URL]
 
-**API Documentation:** [FastAPI Docs](https://lextrace-ai-api.onrender.com/docs)
+**API Documentation:** [Add your Render URL]/docs
 
 ---
 
